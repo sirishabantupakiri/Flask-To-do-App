@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskFlow</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <button id="toggle-theme" class="theme-toggle" aria-label="Toggle Theme"></button>
+    <h1>TaskFlow</h1>
+
+    <!-- 🔍 Search & Filter -->
+    <form method="GET" action="/" class="search-bar">
+      <input type="text" name="search" placeholder="Search tasks..." />
+      <select name="filter">
+        <option value="all" {% if selected_filter == 'all' %}selected{% endif %}>All</option>
+        <option value="completed" {% if selected_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="pending" {% if selected_filter == 'pending' %}selected{% endif %}>Pending</option>
+      </select>
+      <button type="submit">Filter</button>
+    </form>
+
+    <!-- ➕ Add Task -->
+    <form action="/add" method="POST" class="task-form">
+      <input type="text" name="title" placeholder="Task title" required />
+      <input type="text" name="description" placeholder="Description (optional)" />
+      <input type="date" name="due_date" />
+      <button type="submit">Add Task</button>
+    </form>
+
+    <!-- 📋 Task List -->
+    <ul class="task-list">
+      {% for task in tasks %}
+        <li class="task {% if task[4] %}completed{% endif %}">
+          <div class="task-info">
+            <strong>{{ task[1] }}</strong>
+            {% if task[2] %}<small>{{ task[2] }}</small>{% endif %}
+            {% if task[3] %}<small>Due: {{ task[3] }}</small>{% endif %}
+            <span class="status-badge {% if task[4] %}badge-complete{% else %}badge-pending{% endif %}">
+              {% if task[4] %}Completed{% else %}Pending{% endif %}
+            </span>
+          </div>
+          <div class="actions">
+            {% if not task[4] %}
+              <a href="/complete/{{ task[0] }}" class="complete">Mark Complete</a>
+            {% endif %}
+            <form action="/edit/{{ task[0] }}" method="POST" class="inline-form">
+              <input type="text" name="title" value="{{ task[1] }}" required />
+              <input type="text" name="description" value="{{ task[2] or '' }}" />
+              <input type="date" name="due_date" value="{{ task[3] }}" />
+              <button type="submit">Update</button>
+            </form>
+            <a href="/delete/{{ task[0] }}" class="delete">Delete</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
